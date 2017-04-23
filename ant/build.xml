@@ -1,0 +1,65 @@
+<project basedir="../" default="zip-temp-to-output">
+    <property name="input.dir" location="input"/>
+    <property name="output.dir" location="output"/>
+    <property name="temp.dir" location="temp"/>
+
+    <property name="xml.pattern" value="**/*.xml"/>
+    <property name="html.pattern" value="**/*.html"/>
+    <property name="xhtml.pattern" value="**/*.xhtml"/>
+    <property name="png.pattern" value="**/*.png"/>
+    <property name="zip.pattern" value="**/*.zip"/>
+
+    <target name="clean">
+        <delete dir="${temp.dir}"/>
+        <delete dir="${output.dir}"/>
+    </target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="${input.dir}"/>
+        <mkdir dir="${output.dir}"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="from-input-to-temp" depends="init">
+        <copy todir="${temp.dir}">
+            <fileset dir="${input.dir}">
+                <include name="${xml.pattern}"/>
+                <include name="${html.pattern}"/>
+                <include name="${xhtml.pattern}"/>
+                <include name="${zip.pattern}"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="unzip-into-temp" depends="from-input-to-temp">
+        <unzip dest="${temp.dir}" overwrite="true">
+            <fileset dir="${temp.dir}">
+                <include name="**/*.zip"/>
+            </fileset>
+            <patternset>
+                <include name="${xml.pattern}"/>
+                <include name="${html.pattern}"/>
+                <include name="${xhtml.pattern}"/>
+                <include name="${png.pattern}"/>
+            </patternset>
+            <mapper type="flatten"/>
+        </unzip>
+    </target>
+
+    <target name="delete-zip-out-of-temp" depends="unzip-into-temp">
+        <delete>
+            <fileset dir="${temp.dir}" includes="${zip.pattern}"/>
+        </delete>
+    </target>
+
+    <target name="zip-temp-to-output" depends="delete-zip-out-of-temp">
+        <zip destfile="${output.dir}/out.zip">
+            <fileset dir="${temp.dir}">
+                <include name="${xml.pattern}"/>
+                <include name="${html.pattern}"/>
+                <include name="${xhtml.pattern}"/>
+            </fileset>
+        </zip>
+    </target>
+
+</project>
